@@ -11,6 +11,7 @@ import {
   CreditCard,
   Bell,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
   Sidebar,
@@ -34,7 +35,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
-import { logoutAction } from "@/lib/actions/auth"
 
 // Menu items.
 const items = [
@@ -56,6 +56,7 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const user = session?.user
 
@@ -144,7 +145,13 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={async () => {
-                    await logoutAction()
+                    await authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => {
+                          router.push("/login")
+                        },
+                      },
+                    })
                   }}
                 >
                   <LogOut data-icon="inline-start" />

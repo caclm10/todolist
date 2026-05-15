@@ -46,7 +46,7 @@ const items = [
   },
   {
     title: "Projects",
-    url: "#",
+    url: "/projects",
     icon: LayoutList,
   },
   {

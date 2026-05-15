@@ -45,3 +45,25 @@ export const Verification = sqliteTable("verifications", {
 	createdAt: integer("created_at", { mode: "timestamp" }),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 });
+
+export const Project = sqliteTable("projects", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	description: text("description"),
+	userId: text("user_id").notNull().references(() => User.id),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull()
+});
+
+export const Task = sqliteTable("tasks", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	description: text("description"),
+	status: text("status").notNull().default("todo"),
+	priority: text("priority").notNull().default("medium"),
+	projectId: text("project_id").notNull().references(() => Project.id, { onDelete: "cascade" }),
+	userId: text("user_id").notNull().references(() => User.id),
+	dueDate: integer("due_date", { mode: "timestamp" }),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull()
+});

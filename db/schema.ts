@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const user = sqliteTable("user", {
+export const User = sqliteTable("users", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
@@ -10,7 +10,7 @@ export const user = sqliteTable("user", {
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull()
 });
 
-export const session = sqliteTable("session", {
+export const Session = sqliteTable("sessions", {
 	id: text("id").primaryKey(),
 	expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
 	token: text("token").notNull().unique(),
@@ -18,14 +18,14 @@ export const session = sqliteTable("session", {
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 	ipAddress: text("ip_address"),
 	userAgent: text("user_agent"),
-	userId: text("user_id").notNull().references(() => user.id)
+	userId: text("user_id").notNull().references(() => User.id)
 });
 
-export const account = sqliteTable("account", {
+export const Account = sqliteTable("accounts", {
 	id: text("id").primaryKey(),
 	accountId: text("account_id").notNull(),
 	providerId: text("provider_id").notNull(),
-	userId: text("user_id").notNull().references(() => user.id),
+	userId: text("user_id").notNull().references(() => User.id),
 	accessToken: text("access_token"),
 	refreshToken: text("refresh_token"),
 	idToken: text("id_token"),
@@ -37,7 +37,7 @@ export const account = sqliteTable("account", {
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull()
 });
 
-export const verification = sqliteTable("verification", {
+export const Verification = sqliteTable("verifications", {
 	id: text("id").primaryKey(),
 	identifier: text("identifier").notNull(),
 	value: text("value").notNull(),

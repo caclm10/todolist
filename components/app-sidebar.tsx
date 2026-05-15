@@ -100,7 +100,7 @@ export function AppSidebar() {
                   className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="size-8">
-                    <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
+                    <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? ""} />
                     <AvatarFallback className="rounded-lg">
                       {user?.name?.slice(0, 2).toUpperCase() ?? "U"}
                     </AvatarFallback>

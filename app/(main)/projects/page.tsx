@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { eq } from "drizzle-orm"
 import { CreateProjectDialog } from "@/components/create-project-dialog"
+import { ProjectActions } from "@/components/project-actions"
 import {
   Card,
   CardDescription,
@@ -12,6 +13,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Folder } from "lucide-react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Projects",
+    description: "Manage your projects.",
+}
 
 export default async function ProjectsPage() {
     const session = await auth.api.getSession({
@@ -50,8 +57,11 @@ export default async function ProjectsPage() {
                         {projects.map((project) => (
                             <Link key={project.id} href={`/projects/${project.id}`}>
                                 <Card className="h-full transition-colors hover:bg-muted/50">
-                                    <CardHeader>
-                                        <CardTitle>{project.name}</CardTitle>
+                                    <CardHeader className="relative">
+                                        <div className="absolute right-4 top-4">
+                                            <ProjectActions project={project} />
+                                        </div>
+                                        <CardTitle className="pr-8">{project.name}</CardTitle>
                                         <CardDescription className="line-clamp-2">
                                             {project.description || "No description"}
                                         </CardDescription>

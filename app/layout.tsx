@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
+import { Metadata } from "next"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -12,6 +13,14 @@ const fontMono = Geist_Mono({
     subsets: ["latin"],
     variable: "--font-mono",
 })
+
+export const metadata: Metadata = {
+    title: {
+        default: "Todo List",
+        template: "%s | Todo List",
+    },
+    description: "Manage your projects and tasks efficiently.",
+}
 
 export default function RootLayout({
     children,

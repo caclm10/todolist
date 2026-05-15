@@ -63,3 +63,27 @@ export async function deleteProjectAction(id: string) {
 
     revalidatePath("/projects")
 }
+
+export async function updateProjectAction(id: string, data: { name: string, description?: string }) {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    })
+
+    if (!session) {
+        throw new Error("Unauthorized")
+    }
+
+    await db.update(Project).set({
+        name: data.name,
+        description: data.description,
+        updatedAt: new Date(),
+    }).where(
+        and(
+            eq(Project.id, id),
+            eq(Project.userId, session.user.id)
+        )
+    )
+
+    revalidatePath("/projects")
+    revalidatePath(`/projects/${id}`)
+}

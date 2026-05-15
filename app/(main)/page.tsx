@@ -10,6 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { LayoutDashboard, CheckSquare, Folder, Clock } from "lucide-react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Dashboard",
+    description: "Overview of your projects and tasks.",
+}
 
 export default async function DashboardPage() {
     const session = await auth.api.getSession({

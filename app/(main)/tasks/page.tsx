@@ -4,6 +4,12 @@ import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { eq, desc } from "drizzle-orm"
 import { TaskList } from "@/components/task-list"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "All Tasks",
+    description: "View all your tasks.",
+}
 
 export default async function AllTasksPage() {
     const session = await auth.api.getSession({

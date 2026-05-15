@@ -6,9 +6,31 @@ import { eq, and } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { CreateTaskDialog } from "@/components/create-task-dialog"
 import { TaskList } from "@/components/task-list"
+import { ProjectActions } from "@/components/project-actions"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
+import { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    })
+
+    const { id } = await params
+
+    const project = await db.query.Project.findFirst({
+        where: and(
+            eq(Project.id, id),
+            eq(Project.userId, session!.user.id)
+        )
+    })
+
+    return {
+        title: project?.name ?? "Project",
+        description: project?.description ?? "Manage your project tasks.",
+    }
+}
 
 export default async function ProjectPage({ params }: { params: { id: string } }) {
     const session = await auth.api.getSession({
@@ -48,7 +70,10 @@ export default async function ProjectPage({ params }: { params: { id: string } }
                     </Link>
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+                                <ProjectActions project={project} />
+                            </div>
                             {project.description && (
                                 <p className="text-muted-foreground">{project.description}</p>
                             )}

@@ -10,14 +10,15 @@ import { cn } from "@/lib/utils"
 
 type TaskWithProject = typeof Task.$inferSelect
 
-export function TaskList({ tasks, projectId }: { tasks: TaskWithProject[], projectId: string }) {
+export function TaskList({ tasks, projectId: initialProjectId }: { tasks: TaskWithProject[], projectId: string }) {
   async function toggleStatus(task: TaskWithProject) {
     const newStatus = task.status === "done" ? "todo" : "done"
-    await updateTaskStatusAction(task.id, projectId, newStatus)
+    // Use task's own projectId if initialProjectId is empty (global view)
+    await updateTaskStatusAction(task.id, initialProjectId || task.projectId, newStatus)
   }
 
-  async function deleteTask(id: string) {
-    await deleteTaskAction(id, projectId)
+  async function deleteTask(id: string, taskProjectId: string) {
+    await deleteTaskAction(id, initialProjectId || taskProjectId)
   }
 
   const priorityColors = {
@@ -29,7 +30,7 @@ export function TaskList({ tasks, projectId }: { tasks: TaskWithProject[], proje
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
-        <p className="text-sm text-muted-foreground">No tasks in this project yet.</p>
+        <p className="text-sm text-muted-foreground">No tasks found.</p>
       </div>
     )
   }
@@ -74,7 +75,7 @@ export function TaskList({ tasks, projectId }: { tasks: TaskWithProject[], proje
           <Button 
             variant="ghost" 
             size="icon-sm" 
-            onClick={() => deleteTask(task.id)}
+            onClick={() => deleteTask(task.id, task.projectId)}
             className="text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="size-4" />

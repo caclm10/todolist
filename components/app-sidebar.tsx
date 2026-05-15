@@ -51,7 +51,7 @@ const items = [
   },
   {
     title: "Tasks",
-    url: "#",
+    url: "/tasks",
     icon: CheckSquare,
   },
 ]

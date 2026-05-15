@@ -14,6 +14,8 @@ COPY . .
 
 # Nonaktifkan telemetri Next.js saat build
 ENV NEXT_TELEMETRY_DISABLED 1
+# Berikan URL palsu agar build tidak error saat inisialisasi database
+ENV DATABASE_URL="file:dummy.db"
 
 RUN npm run build
 

@@ -6,7 +6,7 @@ import * as z from "zod"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
-import { Camera, Loader2 } from "lucide-react"
+import { Camera, Loader2, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,10 +16,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Field, FieldLabel, FieldError } from "@/components/ui/field"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { uploadAvatarAction } from "@/actions/profile"
+import { uploadAvatarAction, deleteAvatarAction } from "@/actions/profile"
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -51,8 +57,33 @@ export function ProfileForm() {
     }
   }, [session, form])
 
-  async function handleAvatarClick() {
+  async function handleUploadClick() {
     fileInputRef.current?.click()
+  }
+
+  async function handleRemoveAvatar() {
+    if (!session?.user?.image) return
+    
+    setUploading(true)
+    setError(null)
+    
+    try {
+      await deleteAvatarAction()
+      
+      const { error } = await authClient.updateUser({
+        image: null,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      router.refresh()
+    } catch (err: any) {
+      setError(err.message || "Failed to remove image")
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -113,32 +144,49 @@ export function ProfileForm() {
       </CardHeader>
       <CardContent className="space-y-8">
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div 
-            className="group relative cursor-pointer"
-            onClick={handleAvatarClick}
-          >
-            <Avatar className="size-32 border-4 border-background shadow-sm transition-opacity group-hover:opacity-80">
-              <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
-              <AvatarFallback className="text-3xl">
-                {session?.user?.name?.slice(0, 2).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-              {uploading ? (
-                <Loader2 className="size-8 animate-spin text-white" />
-              ) : (
-                <Camera className="size-8 text-white" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="group relative cursor-pointer">
+                <Avatar className="size-32 border-4 border-background shadow-sm transition-opacity group-hover:opacity-80">
+                  <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                  <AvatarFallback className="text-3xl">
+                    {session?.user?.name?.slice(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  {uploading ? (
+                    <Loader2 className="size-8 animate-spin text-white" />
+                  ) : (
+                    <Camera className="size-8 text-white" />
+                  )}
+                </div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              <DropdownMenuItem onClick={handleUploadClick}>
+                <Camera data-icon="inline-start" />
+                Upload Photo
+              </DropdownMenuItem>
+              {session?.user?.image && (
+                <DropdownMenuItem 
+                  onClick={handleRemoveAvatar}
+                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                >
+                  <Trash2 data-icon="inline-start" />
+                  Remove Photo
+                </DropdownMenuItem>
               )}
-            </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={onFileChange}
-              disabled={uploading}
-            />
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={onFileChange}
+            disabled={uploading}
+          />
           <p className="text-xs text-muted-foreground">
             Click to change profile picture
           </p>

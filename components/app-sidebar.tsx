@@ -12,6 +12,7 @@ import {
   Bell,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 import {
   Sidebar,
@@ -78,10 +79,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -129,17 +130,21 @@ export function AppSidebar() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <User data-icon="inline-start" />
-                    Account
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/profile">
+                      <User data-icon="inline-start" />
+                      Account
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <CreditCard data-icon="inline-start" />
                     Billing
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings data-icon="inline-start" />
-                    Settings
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/profile">
+                      <Settings data-icon="inline-start" />
+                      Settings
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />

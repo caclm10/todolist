@@ -1,14 +1,16 @@
 "use client"
 
-import { Task } from "@/db/schema"
+import { Task, Project } from "@/db/schema"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { updateTaskStatusAction, deleteTaskAction } from "@/actions/task"
-import { Trash2 } from "lucide-react"
+import { Trash2, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-type TaskWithProject = typeof Task.$inferSelect
+type TaskWithProject = typeof Task.$inferSelect & {
+    project?: typeof Project.$inferSelect
+}
 
 export function TaskList({ tasks, projectId: initialProjectId }: { tasks: TaskWithProject[], projectId: string }) {
   async function toggleStatus(task: TaskWithProject) {
@@ -60,7 +62,13 @@ export function TaskList({ tasks, projectId: initialProjectId }: { tasks: TaskWi
                   {task.description}
                 </p>
               )}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {task.project && !initialProjectId && (
+                    <div className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                        <Folder className="size-3" />
+                        {task.project.name}
+                    </div>
+                )}
                 <Badge variant="outline" className={cn("text-[10px] uppercase", priorityColors[task.priority as keyof typeof priorityColors])}>
                   {task.priority}
                 </Badge>

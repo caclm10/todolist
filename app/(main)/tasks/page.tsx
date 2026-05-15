@@ -15,6 +15,9 @@ export default async function AllTasksPage() {
     const tasks = await db.query.Task.findMany({
         where: eq(Task.userId, userId),
         orderBy: [desc(Task.createdAt)],
+        with: {
+            project: true
+        }
     })
 
     return (

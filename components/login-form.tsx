@@ -4,6 +4,9 @@ import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import * as z from "zod"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { authClient } from "@/lib/auth-client"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +27,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,8 +39,21 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(data: LoginFormValues) {
-    console.log(data)
+  async function onSubmit(data: LoginFormValues) {
+    setLoading(true)
+    setError(null)
+    const { error } = await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+    })
+
+    if (error) {
+      setError(error.message || "Something went wrong")
+      setLoading(false)
+    } else {
+      router.push("/")
+      router.refresh()
+    }
   }
 
   return (
@@ -46,6 +66,11 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          {error && (
+            <div className="text-sm font-medium text-destructive">
+              {error}
+            </div>
+          )}
           <Controller
             name="email"
             control={form.control}
@@ -87,8 +112,8 @@ export function LoginForm() {
               </Field>
             )}
           />
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}

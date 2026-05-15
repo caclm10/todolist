@@ -4,6 +4,9 @@ import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import * as z from "zod"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { authClient } from "@/lib/auth-client"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +32,10 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -39,8 +46,22 @@ export function RegisterForm() {
     },
   })
 
-  function onSubmit(data: RegisterFormValues) {
-    console.log(data)
+  async function onSubmit(data: RegisterFormValues) {
+    setLoading(true)
+    setError(null)
+    const { error } = await authClient.signUp.email({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+    })
+
+    if (error) {
+      setError(error.message || "Something went wrong")
+      setLoading(false)
+    } else {
+      router.push("/")
+      router.refresh()
+    }
   }
 
   return (
@@ -53,6 +74,11 @@ export function RegisterForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          {error && (
+            <div className="text-sm font-medium text-destructive">
+              {error}
+            </div>
+          )}
           <Controller
             name="name"
             control={form.control}
@@ -118,8 +144,8 @@ export function RegisterForm() {
               </Field>
             )}
           />
-          <Button type="submit" className="w-full">
-            Create account
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Creating account..." : "Create account"}
           </Button>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}

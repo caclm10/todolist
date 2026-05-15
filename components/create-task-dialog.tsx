@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import * as z from "zod"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -39,7 +40,6 @@ type TaskFormValues = z.infer<typeof taskSchema>
 export function CreateTaskDialog({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
@@ -52,13 +52,13 @@ export function CreateTaskDialog({ projectId }: { projectId: string }) {
 
   async function onSubmit(data: TaskFormValues) {
     setLoading(true)
-    setError(null)
     try {
       await createTaskAction({ ...data, projectId })
+      toast.success("Task added successfully")
       setOpen(false)
       form.reset()
     } catch (err: any) {
-      setError(err.message || "Failed to create task")
+      toast.error(err.message || "Failed to create task")
     } finally {
       setLoading(false)
     }
@@ -80,11 +80,6 @@ export function CreateTaskDialog({ projectId }: { projectId: string }) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-          {error && (
-            <div className="text-sm font-medium text-destructive">
-              {error}
-            </div>
-          )}
           <Controller
             name="name"
             control={form.control}

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import * as z from "zod"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -31,7 +32,6 @@ type ProjectFormValues = z.infer<typeof projectSchema>
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
@@ -43,13 +43,13 @@ export function CreateProjectDialog() {
 
   async function onSubmit(data: ProjectFormValues) {
     setLoading(true)
-    setError(null)
     try {
       await createProjectAction(data)
+      toast.success("Project created successfully")
       setOpen(false)
       form.reset()
     } catch (err: any) {
-      setError(err.message || "Failed to create project")
+      toast.error(err.message || "Failed to create project")
     } finally {
       setLoading(false)
     }
@@ -71,11 +71,6 @@ export function CreateProjectDialog() {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-          {error && (
-            <div className="text-sm font-medium text-destructive">
-              {error}
-            </div>
-          )}
           <Controller
             name="name"
             control={form.control}

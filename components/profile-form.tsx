@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { Camera, Loader2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -36,8 +37,6 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 export function ProfileForm() {
     const router = useRouter()
     const { data: session } = authClient.useSession()
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
     const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -65,7 +64,6 @@ export function ProfileForm() {
         if (!session?.user?.image) return
 
         setUploading(true)
-        setError(null)
 
         try {
             await deleteAvatarAction()
@@ -78,9 +76,10 @@ export function ProfileForm() {
                 throw new Error(error.message)
             }
 
+            toast.success("Profile picture removed")
             router.refresh()
         } catch (err: any) {
-            setError(err.message || "Failed to remove image")
+            toast.error(err.message || "Failed to remove image")
         } finally {
             setUploading(false)
         }
@@ -91,7 +90,6 @@ export function ProfileForm() {
         if (!file) return
 
         setUploading(true)
-        setError(null)
 
         try {
             const formData = new FormData()
@@ -107,9 +105,10 @@ export function ProfileForm() {
                 throw new Error(error.message)
             }
 
+            toast.success("Profile picture updated")
             router.refresh()
         } catch (err: any) {
-            setError(err.message || "Failed to upload image")
+            toast.error(err.message || "Failed to upload image")
         } finally {
             setUploading(false)
         }
@@ -117,18 +116,16 @@ export function ProfileForm() {
 
     async function onSubmit(data: ProfileFormValues) {
         setLoading(true)
-        setError(null)
-        setSuccess(false)
 
         const { error } = await authClient.updateUser({
             name: data.name,
         })
 
         if (error) {
-            setError(error.message || "Something went wrong")
+            toast.error(error.message || "Something went wrong")
             setLoading(false)
         } else {
-            setSuccess(true)
+            toast.success("Profile updated successfully")
             setLoading(false)
             router.refresh()
         }
@@ -148,9 +145,11 @@ export function ProfileForm() {
                         <DropdownMenuTrigger asChild>
                             <div className="group relative cursor-pointer">
                                 <Avatar className="size-32 border-4 border-background shadow-sm transition-opacity group-hover:opacity-80">
-                                  <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || ""} />
-                                  <AvatarFallback className="text-3xl">
-
+                                    <AvatarImage
+                                        src={session?.user?.image || undefined}
+                                        alt={session?.user?.name || ""}
+                                    />
+                                    <AvatarFallback className="text-3xl">
                                         {session?.user?.name
                                             ?.slice(0, 2)
                                             .toUpperCase() || "U"}
@@ -199,17 +198,6 @@ export function ProfileForm() {
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-6"
                 >
-                    {error && (
-                        <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                            {error}
-                        </div>
-                    )}
-                    {success && (
-                        <div className="rounded-md bg-green-500/15 p-3 text-sm font-medium text-green-600">
-                            Profile updated successfully!
-                        </div>
-                    )}
-
                     <Controller
                         name="name"
                         control={form.control}

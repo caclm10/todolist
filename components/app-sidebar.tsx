@@ -1,9 +1,15 @@
+"use client"
+
 import {
   LayoutDashboard,
   LayoutList,
   CheckSquare,
-  User2,
   ChevronUp,
+  LogOut,
+  User,
+  Settings,
+  CreditCard,
+  Bell,
 } from "lucide-react"
 
 import {
@@ -21,10 +27,14 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { authClient } from "@/lib/auth-client"
+import { logoutAction } from "@/lib/actions/auth"
 
 // Menu items.
 const items = [
@@ -46,6 +56,9 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const { data: session, isPending } = authClient.useSession()
+  const user = session?.user
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -80,36 +93,62 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg" className="w-full">
+                <SidebarMenuButton
+                  size="lg"
+                  className="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
                   <Avatar className="size-8">
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarImage src={user?.image ?? ""} alt={user?.name ?? ""} />
+                    <AvatarFallback className="rounded-lg">
+                      {user?.name?.slice(0, 2).toUpperCase() ?? "U"}
+                    </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-1 flex-col items-start text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">John Doe</span>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {isPending ? "Loading..." : user?.name ?? "Guest"}
+                    </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      john@example.com
+                      {user?.email ?? "Not signed in"}
                     </span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
                 side="top"
                 align="start"
-                className="w-[--radix-dropdown-menu-trigger-width]"
+                sideOffset={4}
               >
-                <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Log out</span>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <Bell data-icon="inline-start" />
+                    Notifications
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <User data-icon="inline-start" />
+                    Account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <CreditCard data-icon="inline-start" />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings data-icon="inline-start" />
+                    Settings
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await logoutAction()
+                  }}
+                >
+                  <LogOut data-icon="inline-start" />
+                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

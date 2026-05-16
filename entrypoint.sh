@@ -2,7 +2,7 @@
 
 # Jalankan update schema database
 echo "Updating database schema..."
-npx drizzle-kit push
+node db/migrate.mjs
 
 # Jalankan aplikasi utama
 echo "Starting application..."
